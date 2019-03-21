@@ -2,6 +2,9 @@
 # import time
 import numpy as np
 import curses
+from playsound import playsound
+
+SEQ_LENGTH = 5
 
 # PWM OUTPUT
 # ledN = 1
@@ -23,7 +26,7 @@ def printToScreen(window, text, y=1):
 # Loop
 def loop(window):
     while True:
-        sequence = getRandomSequence(5)
+        sequence = getRandomSequence(SEQ_LENGTH)
         song = 1;
         printToScreen(window, str(sequence), 0)
         startAttempt(sequence, window)
@@ -41,7 +44,7 @@ def getDirection(k):
         return 'E'
 
 def startAttempt(sequence, window):
-    for current_direction in sequence:
+    for index, current_direction in enumerate(sequence):
         k = window.get_wch()
         current_input = getDirection(k)
 
@@ -52,6 +55,10 @@ def startAttempt(sequence, window):
             return
         else:
             printToScreen(window, 'right')
+            if index != SEQ_LENGTH:
+                playsound("C:/Users/s152480/PycharmProjects/GamesAndPlay3/Beatit/BeatitPart" + str(index) + ".mp3")
+            else:
+                playsound("C:/Users/s152480/PycharmProjects/GamesAndPlay3/Beatit/BeatitFull.mp3")
 
         curses.flushinp()
     printToScreen(window, 'sequence complete')

@@ -1,6 +1,7 @@
 # import RPi.GPIO as GPIO
 # import time
 import numpy as np
+import curses
 
 # PWM OUTPUT
 # ledN = 1
@@ -10,32 +11,50 @@ import numpy as np
 
 # Initialization
 def setup():
-     return 0
+    window = curses.initscr()
+    curses.noecho()
+    window.keypad(True)
+    return window
+
+def printToScreen(window, text, y=1):
+    window.addstr(y, 0, text, curses.A_REVERSE)
+    window.refresh()
 
 # Loop
-def loop():
+def loop(window):
     while True:
         sequence = getRandomSequence(5)
         song = 1;
+        printToScreen(window, str(sequence), 0)
+        startAttempt(sequence, window)
+        printToScreen(window, "new sequence is generated")
 
-        startAttempt(sequence)
-        print("new sequence is generated")
 
+def getDirection(k):
+    if k == 259:
+        return 'N'
+    if k == 258:
+        return 'S'
+    if k == 260:
+        return 'W'
+    if k == 261:
+        return 'E'
 
-def startAttempt(sequence):
-
-    print(sequence)
-
+def startAttempt(sequence, window):
     for current_direction in sequence:
-        current_input = input("Press N,W,E,S")
+        k = window.get_wch()
+        current_input = getDirection(k)
+
         if current_input != current_direction:
             # reset attempt if direction is wrong
-            print('wrong')
-            startAttempt(sequence)
+            printToScreen(window, 'wrong')
+            startAttempt(sequence, window)
             return
         else:
-            print('right')
-    print('sequence complete')
+            printToScreen(window, 'right')
+
+        curses.flushinp()
+    printToScreen(window, 'sequence complete')
 
 def playSong():
     return 0
@@ -49,4 +68,5 @@ def getRandomSequence(length):
     return seq
 
 # Execution
-loop()
+window = setup()
+loop(window)

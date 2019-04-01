@@ -3,6 +3,12 @@
 import numpy as np
 import curses
 from playsound import playsound
+import os
+from os import path
+import threading
+
+import pygame
+pygame.mixer.init()
 
 SEQ_LENGTH = 5
 
@@ -11,6 +17,13 @@ SEQ_LENGTH = 5
 # ledW = 2
 # ledS = 3
 # ledE = 4
+
+
+def empty():
+    ''''''
+
+t = threading.Timer(0, empty)
+playingSong = ''
 
 # Initialization
 def setup():
@@ -30,7 +43,41 @@ def loop(window):
         song = 1;
         printToScreen(window, str(sequence), 0)
         startAttempt(sequence, window)
-        printToScreen(window, "new sequence is generated")
+        printToScreen(window, "new sequence is generated", 2)
+
+def playFailureSound():
+    global playingSong
+    playingSong = 'fail'
+    pygame.mixer.music.stop()
+    pygame.mixer.music.load('./fail.wav')
+    pygame.mixer.music.play()
+
+def stopMusic():
+    pygame.mixer.music.stop()
+
+def stopMusicAfter(seconds):
+    global t
+    t.cancel() # cancel the old timer
+    t = threading.Timer(seconds, stopMusic)
+    t.start()
+
+def continueMusic(song):
+    global playingSong
+    printToScreen(window, playingSong, 2)
+    src = path.normpath(path.join(os.getcwd(), 'songs', song + '.wav'))
+
+    if not pygame.mixer.music.get_busy():
+        pygame.mixer.music.load(src)
+        pygame.mixer.music.play()
+
+    if pygame.mixer.music.get_busy() and not playingSong is song:
+        printToScreen(window, 'playin', 3)
+        pygame.mixer.music.stop()
+        pygame.mixer.music.load(src)
+        pygame.mixer.music.play()
+
+    playingSong = song
+    stopMusicAfter(3.0)
 
 
 def getDirection(k):
@@ -44,27 +91,22 @@ def getDirection(k):
         return 'E'
 
 def startAttempt(sequence, window):
-    for index, current_direction in enumerate(sequence):
+    for index, current_direction in enumerate(sequence, start=1):
         k = window.get_wch()
         current_input = getDirection(k)
 
         if current_input != current_direction:
             # reset attempt if direction is wrong
             printToScreen(window, 'wrong')
+            playFailureSound()
             startAttempt(sequence, window)
             return
         else:
             printToScreen(window, 'right')
-            if index != SEQ_LENGTH:
-                playsound("C:/Users/s152480/PycharmProjects/GamesAndPlay3/Beatit/BeatitPart" + str(index) + ".mp3")
-            else:
-                playsound("C:/Users/s152480/PycharmProjects/GamesAndPlay3/Beatit/BeatitFull.mp3")
+            continueMusic('BeatIt')
 
         curses.flushinp()
     printToScreen(window, 'sequence complete')
-
-def playSong():
-    return 0
 
 # Return a list of a certain length filled with directions
 def getRandomSequence(length):

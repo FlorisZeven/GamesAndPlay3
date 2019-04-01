@@ -118,7 +118,6 @@ def startAttempt(sequence, window):
 
         curses.flushinp()
     printToScreen(window, 'sequence complete')
-    pygame.mixer.music.stop()
 
 # Return a list of a certain length filled with directions
 def getRandomSequence(length):

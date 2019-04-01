@@ -7,6 +7,9 @@ import os
 from os import path
 import threading
 
+from rpi_ws281x import Color
+import leds
+
 import pygame
 pygame.mixer.init()
 
@@ -29,6 +32,7 @@ playingSong = ''
 
 # Initialization
 def setup():
+    leds.set(Color(0,0,0))
     window = curses.initscr()
     curses.noecho()
     window.keypad(True)
@@ -110,12 +114,14 @@ def startAttempt(sequence, window, song):
             # reset attempt if direction is wrong
             printToScreen(window, 'wrong')
             playFailureSound()
+            leds.set(Color(255,0,0))
             startAttempt(sequence, window, song)
             return
         else:
             printToScreen(window, 'right')
-            sec = 10.0 if index is len(sequence) else 1.0
+            sec = 10.0 if index is len(sequence) else 2.0
             continueMusic(song, sec)
+            leds.set(Color(0,255,0))
 
         curses.flushinp()
     printToScreen(window, 'sequence complete')
@@ -126,7 +132,6 @@ def getRandomSequence(length):
     return np.random.choice(DIRECTIONS, length).tolist()
 
 def getRandomSong():
-
     return np.random.choice(SONGS, 1)
 
 # Execution

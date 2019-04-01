@@ -11,6 +11,8 @@ import pygame
 pygame.mixer.init()
 
 SEQ_LENGTH = 5
+DIRECTIONS = ['N', 'W', 'S', 'E']
+SONGS = ['BeatIt', 'AnotherOneBitesTheDust', 'HighwayToHell', 'NsInParis']
 
 # PWM OUTPUT
 # ledN = 1
@@ -40,9 +42,9 @@ def printToScreen(window, text, y=1):
 def loop(window):
     while True:
         sequence = getRandomSequence(SEQ_LENGTH)
-        song = 1;
+        song = getRandomSong()
         printToScreen(window, str(sequence), 0)
-        startAttempt(sequence, window)
+        startAttempt(sequence, window, song)
         printToScreen(window, "new sequence is generated", 2)
 
 def playFailureSound():
@@ -89,7 +91,6 @@ def continueMusic(song, seconds):
     playingSong = song
     stopMusicAfter(seconds)
 
-
 def getDirection(k):
     if k == 259:
         return 'N'
@@ -100,7 +101,7 @@ def getDirection(k):
     if k == 261:
         return 'E'
 
-def startAttempt(sequence, window):
+def startAttempt(sequence, window, song):
     for index, current_direction in enumerate(sequence, start=1):
         k = window.get_wch()
         current_input = getDirection(k)
@@ -109,12 +110,12 @@ def startAttempt(sequence, window):
             # reset attempt if direction is wrong
             printToScreen(window, 'wrong')
             playFailureSound()
-            startAttempt(sequence, window)
+            startAttempt(sequence, window, song)
             return
         else:
             printToScreen(window, 'right')
             sec = 10.0 if index is len(sequence) else 1.0
-            continueMusic('BeatIt', sec)
+            continueMusic(song, sec)
 
         curses.flushinp()
     printToScreen(window, 'sequence complete')
@@ -123,10 +124,11 @@ def startAttempt(sequence, window):
 # Return a list of a certain length filled with directions
 def getRandomSequence(length):
 
-    directions = ['N', 'W', 'S', 'E']
-    seq = np.random.choice(directions, length).tolist()
+    return np.random.choice(DIRECTIONS, length).tolist()
 
-    return seq
+def getRandomSong():
+
+    return np.random.choice(SONGS, 1)
 
 # Execution
 window = setup()

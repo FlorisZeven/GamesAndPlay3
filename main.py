@@ -53,31 +53,41 @@ def playFailureSound():
     pygame.mixer.music.play()
 
 def stopMusic():
-    pygame.mixer.music.stop()
+    pygame.mixer.music.pause()
 
 def stopMusicAfter(seconds):
     global t
     t.cancel() # cancel the old timer
     t = threading.Timer(seconds, stopMusic)
     t.start()
+    printToScreen(window, '   ', 4)
 
-def continueMusic(song):
+def continueMusic(song, seconds):
     global playingSong
     printToScreen(window, playingSong, 2)
     src = path.normpath(path.join(os.getcwd(), 'songs', song + '.wav'))
 
     if not pygame.mixer.music.get_busy():
-        pygame.mixer.music.load(src)
-        pygame.mixer.music.play()
+        printToScreen(window, '!!!', 4)
+        if not playingSong is song:
+            pygame.mixer.music.load(src)
+            pygame.mixer.music.play()
+        else:
+            printToScreen(window, 'resuming', 3)
+            pygame.mixer.music.unpause()
 
-    if pygame.mixer.music.get_busy() and not playingSong is song:
-        printToScreen(window, 'playin', 3)
-        pygame.mixer.music.stop()
-        pygame.mixer.music.load(src)
-        pygame.mixer.music.play()
+    if pygame.mixer.music.get_busy():
+        if not playingSong is song:
+            printToScreen(window, 'playing', 3)
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load(src)
+            pygame.mixer.music.play()
+        else:
+            printToScreen(window, 'resuming', 3)
+            pygame.mixer.music.unpause()
 
     playingSong = song
-    stopMusicAfter(3.0)
+    stopMusicAfter(seconds)
 
 
 def getDirection(k):
@@ -103,10 +113,12 @@ def startAttempt(sequence, window):
             return
         else:
             printToScreen(window, 'right')
-            continueMusic('BeatIt')
+            sec = 10.0 if index is len(sequence) else 1.0
+            continueMusic('BeatIt', sec)
 
         curses.flushinp()
     printToScreen(window, 'sequence complete')
+    pygame.mixer.music.stop()
 
 # Return a list of a certain length filled with directions
 def getRandomSequence(length):

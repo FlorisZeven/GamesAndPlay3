@@ -124,6 +124,8 @@ def startAttempt(sequence, window, song):
             leds.set(Color(0,255,0))
 
         curses.flushinp()
+    leds.rb()
+    leds.set(Color(0,0,0))
     printToScreen(window, 'sequence complete')
 
 # Return a list of a certain length filled with directions
@@ -132,7 +134,7 @@ def getRandomSequence(length):
     return np.random.choice(DIRECTIONS, length).tolist()
 
 def getRandomSong():
-    return np.random.choice(SONGS, 1)
+    return np.random.choice(SONGS, 1)[0]
 
 # Execution
 window = setup()

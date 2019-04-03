@@ -34,7 +34,7 @@ def colorWipe(strip, color, wait_ms=50):
         strip.show()
         time.sleep(wait_ms/1000.0)
 
-def theaterChase(strip, color, wait_ms=50, iterations=10):
+def theaterChase(strip, color, wait_ms=50, iterations=1):
     """Movie theater light style chaser animation."""
     for j in range(iterations):
         for q in range(3):
@@ -74,7 +74,7 @@ def rainbowCycle(strip, wait_ms=20, iterations=5):
 
 def theaterChaseRainbow(strip, wait_ms=50):
     """Rainbow movie theater light style chaser animation."""
-    for j in range(256):
+    for j in range(0, 256, 3):
         for q in range(3):
             for i in range(0, strip.numPixels(), 3):
                 strip.setPixelColor(i+q, wheel((i+j) % 255))
@@ -116,4 +116,4 @@ def set(color):
     colorSet(strip, color)
 
 def rb():
-    rainbowCycle(strip)
+    theaterChaseRainbow(strip, wait_ms=40)
